@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+bool dashboardSwitchState = false; 
+int dashboardSliderValue = 0;
 
 // --- WiFi Credentials ---
 const char* ssid = "OnePlus 8 Pro";
@@ -43,31 +45,26 @@ void setup_wifi() {
     Serial.println(WiFi.localIP());
 }
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
-    Serial.print("Message arrived on topic: ");
-    Serial.print(topic);
-    Serial.print(". Message: ");
     String messageTemp;
-
     for (int i = 0; i < length; i++) {
         messageTemp += (char)payload[i];
     }
-    Serial.println(messageTemp);
-
-    // Handle the message based on the topic
+    
+    // --- SAVE THE SWITCH STATE ---
     if (String(topic) == topic_switch) {
-        if (messageTemp == "ON") {
-            GreenOn();
-        } else if (messageTemp == "OFF") {
-            GreenOff();
+        // Node-RED might send "true", "1", or "ON" depending on how you set it up
+        if (messageTemp == "true" || messageTemp == "1" || messageTemp == "ON") {
+            dashboardSwitchState = true; 
+        } else {
+            dashboardSwitchState = false;
         }
-    } else if (String(topic) == topic_slider) {
-        int sliderValue = messageTemp.toInt();
-        // Use sliderValue to control something, e.g., brightness
-        Serial.print("Slider value: ");
-        Serial.println(sliderValue);
+    } 
+    
+    // --- SAVE THE SLIDER STATE ---
+    else if (String(topic) == topic_slider) {
+        dashboardSliderValue = messageTemp.toInt(); 
     }
 }
-
 
 void mqqt_setup() {
     client.setServer(mqtt_server, mqtt_port);
@@ -78,7 +75,7 @@ void mqtt_reconnect() {
     // Loop until we're reconnected
     while (!client.connected()) {
         Serial.print("Attempting Maqiatto MQTT connection...");
-          
+
         // Create a random client ID
         String clientId = "ESP32Client-";
         clientId += String(random(0xffff), HEX);
