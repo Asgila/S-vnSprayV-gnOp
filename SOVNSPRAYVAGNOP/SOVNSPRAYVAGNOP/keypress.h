@@ -7,6 +7,8 @@ class keyTracker {
 
     public:
 
+    float lastKeyTime = 0;
+
     void update() {
         if (Serial.available() > 0) {
             String input = Serial.readStringUntil('\n');
@@ -14,6 +16,7 @@ class keyTracker {
 
             if (input == "key_pressed") {
                 _hasActivity = true;
+                lastKeyTime = millis(); // Update the last key press time
             }
             else if (input == "no_key_pressed"){
                 _hasActivity = false;
@@ -22,7 +25,7 @@ class keyTracker {
             
         }
         bool wasKeyPressed() {
-            return _hasActivity;
+            return lastKeyTime;
         }
 };
 

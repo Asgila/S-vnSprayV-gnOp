@@ -16,74 +16,109 @@ unsigned long lastServoTime = 0;
 unsigned long lastLightTime = 0;
 unsigned long lastSensorTime = 0;
 unsigned long lastBuzzerTime = 0;
+unsigned long lastKeyTime = 0;
 
+int dist = 0;
 int lightState = 0; 
 
 void setup() {
     delay(500); // Short delay for stability
-Serial.begin(115200);        
+    Serial.begin(115200);        
     myBuzzer.begin();
     pinMode(LED_PIN_red, OUTPUT);
     pinMode(LED_PIN_yellow, OUTPUT);
     pinMode(LED_PIN_green, OUTPUT);
     
     setupDisplay();
-    DisplayText("System Online");
     setup_wifi();
     delay(2000);
     mqqt_setup();
 }
+
+void buzz(int interval, int duration, bool status) {
+    unsigned long currentTime = millis();
+    if (status && (currentTime - lastBuzzerTime >= interval)) {
+        myBuzzer.beep(duration);
+        lastBuzzerTime = currentTime;
+    }
+}
+
+void active() {
+    RedOff();
+    YellowOff();
+    GreenOn();
+    DisplayText("Keep going !");
+}
+
+void inactive() {
+    RedOff();
+    YellowOn();
+    GreenOff();
+    DisplayText("Get back to work");
+}
+
+void attack() {
+    RedOn();
+    YellowOff();
+    GreenOff();
+    DisplayText("Fuck You !!!!!!!");
+}
+
+
+
+
+
 
 void loop() {
     // looks for updates
     tracker.update();
     myBuzzer.update();
     updateServo();
-
+    float distance = distSensor.GetDistance();
     unsigned long currentTime = millis();
+    lastKeyTime = tracker.wasKeyPressed();
 // DO NOT DELETE BEFORE THIS!!!
 
-    // if keypress turn on green light 
-    if (tracker.wasKeyPressed()) {
-        GreenOn();
-    } else {
-        GreenOff();
-    }
+    switch (dashboardSwitchState)
+    {
+    case true:
+        
+        DisplayText("System Online");
+        dist = dashboardSliderValue;
+        if (distance < dist) {
 
-
-    // Servo every 5 seconds
-    if (currentTime - lastServoTime >= 5000) {
-        startServoCycle();
-        lastServoTime = currentTime;
-    }
-
-    // Red and yellow blinking
-    if (currentTime - lastLightTime >= 1000) {
-        if (lightState == 0) {
-            RedOn();
-            YellowOn();
-            lightState = 1;
-        } else {
-            RedOff();
+            GreenOff();
             YellowOff();
-            lightState = 0;
+            RedOn();
+            DisplayText("Too far away");
+            buzz(1000, 500, true); // Beep every 1 second for 500ms
         }
-        lastLightTime = currentTime;
-    }
 
-    // display distance every 5 seconds
-    if (currentTime - lastSensorTime >= 500) {
-        float distance = distSensor.GetDistance();
-        String distanceMessage = "Dist: " + String(distance) + " cm";
-        DisplayText(distanceMessage);
-        lastSensorTime = currentTime;
-    }
+        if (currentTime - lastKeyTime < 1000) { // If key was pressed in the last second
+            active();
+        }
 
-    if (currentTime - lastBuzzerTime >=8000){
-        myBuzzer.beep(50);
-        lastBuzzerTime = currentTime;
-    }
+        if ((currentTime - lastKeyTime >= 1000) && (currentTime - lastKeyTime < 5000)) { // If key was pressed in the last second
+            inactive();
+            buzz(1000, 500, true); // Beep every 1 second for 500ms
+        }
+
+        if (currentTime - lastKeyTime >= 5000) { // If key was pressed in the last second
+            attack();
+            buzz(500, 300, false); // Beep every 1 second for 500ms
+        }
+
+        break;
     
+    default:
+    
+        DisplayText("System Offline");
+        break;
+    } 
+
+
+
+
     if (!client.connected()) {
         mqtt_reconnect(); 
     }
