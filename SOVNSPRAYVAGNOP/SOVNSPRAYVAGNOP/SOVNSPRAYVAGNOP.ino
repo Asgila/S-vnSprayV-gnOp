@@ -5,6 +5,7 @@
 #include "distancsensor.h"
 #include "keypress.h"
 #include "buzzer.h"
+#include "mqtt.h"
 
 keyTracker tracker;
 Ultrasonic distSensor(18, 19);
@@ -28,6 +29,9 @@ Serial.begin(115200);
     
     setupDisplay();
     DisplayText("System Online");
+    setup_wifi();
+    delay(2000);
+    mqqt_setup();
 }
 
 void loop() {
@@ -79,4 +83,9 @@ void loop() {
         myBuzzer.beep(50);
         lastBuzzerTime = currentTime;
     }
+    
+    if (!client.connected()) {
+        mqtt_reconnect(); 
+    }
+    client.loop();
 }
