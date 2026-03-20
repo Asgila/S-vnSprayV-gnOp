@@ -5,7 +5,7 @@ bool dashboardSwitchState = false;
 int dashboardSliderValue = 0;
 
 // --- WiFi Credentials ---
-const char* ssid = "Nat & Simon 2.4";
+const char* ssid = "Nat og Simon 2.4";
 const char* password = "Whatever1012";
 
 // --- Maqiatto Broker Settings ---
