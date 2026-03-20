@@ -1,4 +1,4 @@
-// Define the built-in LED pin (usually pin 2 on ESP32 boards)
+
 #define LED_PIN_red 2
 #define LED_PIN_yellow 0
 #define LED_PIN_green 4
