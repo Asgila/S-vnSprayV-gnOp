@@ -27,13 +27,13 @@ void updateServo() {
     unsigned long currentTime = millis();
 
     // wait 1 s
-    if (servoStep == 1 && (currentTime - servoMoveStartTime >= 1000)) {
+    if (servoStep == 1 && (currentTime - servoMoveStartTime >= 500)) {
         myServo.write(0);
         servoMoveStartTime = currentTime;
         servoStep = 2;
     }
     // wait 1 s
-    else if (servoStep == 2 && (currentTime - servoMoveStartTime >= 1000)) {
+    else if (servoStep == 2 && (currentTime - servoMoveStartTime >= 500)) {
         myServo.detach();
         servoIsMoving = false;
         servoStep = 0;

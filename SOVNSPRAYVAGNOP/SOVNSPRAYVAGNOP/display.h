@@ -13,8 +13,13 @@ void setupDisplay() {
 }
 
 void DisplayText(String message) {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(message);
+  static String lastMessage = "";
+  if (message != lastMessage) {
+    lastMessage = message;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(message);
+  }
+  
 }
 #endif

@@ -2,7 +2,7 @@
 #include <PubSubClient.h>
 
 bool dashboardSwitchState = false; 
-int dashboardSliderValue = 0;
+int dashboardSliderValue = 1;
 
 // --- WiFi Credentials ---
 const char* ssid = "OnePlus 8 Pro";

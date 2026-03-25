@@ -13,11 +13,15 @@ Buzzer myBuzzer(21);
 
 // Timing variables
 unsigned long lastServoTime = 0;
+unsigned long lastTime = 0;
 unsigned long lastLightTime = 0;
-unsigned long lastSensorTime = 0;
+unsigned long lastAlarmTime = 0;
 unsigned long lastBuzzerTime = 0;
-
+int distanceMultiplier=50;
+unsigned long maxDistance=300;
+int secondsNoPress = 0;
 int lightState = 0; 
+int alarmTime = 5;
 
 void setup() {
     delay(500); // Short delay for stability
@@ -35,57 +39,87 @@ Serial.begin(115200);
 }
 
 void loop() {
-    // looks for updates
+    if (!client.connected()) {
+        mqtt_reconnect();
+    }
     tracker.update();
     myBuzzer.update();
     updateServo();
-
+    client.loop();
+    delay(50);//Delay to add stability
     unsigned long currentTime = millis();
-// DO NOT DELETE BEFORE THIS!!!
 
-    // if keypress turn on green light 
-    if (tracker.wasKeyPressed()) {
+    
+    if (dashboardSwitchState){//If node-red is on 
         GreenOn();
-    } else {
-        GreenOff();
-    }
+
+        bool keyPressed = tracker.wasKeyPressed();
+
+        float threshold = (float)dashboardSliderValue * (float)distanceMultiplier;
+        float currentDist = distSensor.GetDistance();
 
 
-    // Servo every 5 seconds
-    if (currentTime - lastServoTime >= 5000) {
-        startServoCycle();
-        lastServoTime = currentTime;
-    }
+        if (threshold>currentDist){//If it is inside distance
+            if (!keyPressed && (currentTime-lastTime)>1010){//If no key was pressed and a second has passed
+                secondsNoPress += 1;
+                lastTime=currentTime;
+            }
+            else if (keyPressed){//If a key has been pressed
+                secondsNoPress = 0;
+                RedOff();
+                YellowOff();
+                DisplayText("Great Job");
 
-    // Red and yellow blinking
-    if (currentTime - lastLightTime >= 1000) {
-        if (lightState == 0) {
+            }
+
+            
+
+            if (secondsNoPress>alarmTime){//If alarm and spray should be on
+                RedOn();
+                DisplayText("GET BACK TO WORK");
+                if (currentTime-lastAlarmTime>1000){
+                    lastAlarmTime = currentTime;
+                    startServoCycle();
+                    myBuzzer.beep(400);
+                }
+
+
+            }
+            else if (secondsNoPress>alarmTime/2){//if the yellow led should be on 
+                YellowOn();
+                DisplayText("Get working");
+
+            }
+
+            else if (secondsNoPress<alarmTime/2){//if the yellow led should be off
+                YellowOff();
+                RedOff();
+            }
+
+
+        }
+        else if(threshold<currentDist){//If it is out of distance
+            DisplayText("Come Closer");
+            secondsNoPress = 0;
+            Serial.print("ouside distance\n");
             RedOn();
             YellowOn();
-            lightState = 1;
-        } else {
-            RedOff();
-            YellowOff();
-            lightState = 0;
+            myBuzzer.beep(25);
         }
-        lastLightTime = currentTime;
+
+        
+
+    }
+    else {
+    //No led to signify off
+        GreenOff();
+        RedOff();
+        YellowOff();
+        secondsNoPress = 0;
+        Serial.print("NODE-RED OFF\n");
+        DisplayText("Machine Off");
+        
+
     }
 
-    // display distance every 5 seconds
-    if (currentTime - lastSensorTime >= 500) {
-        float distance = distSensor.GetDistance();
-        String distanceMessage = "Dist: " + String(distance) + " cm";
-        DisplayText(distanceMessage);
-        lastSensorTime = currentTime;
-    }
-
-    if (currentTime - lastBuzzerTime >=8000){
-        myBuzzer.beep(50);
-        lastBuzzerTime = currentTime;
-    }
-    
-    if (!client.connected()) {
-        mqtt_reconnect(); 
-    }
-    client.loop();
 }
