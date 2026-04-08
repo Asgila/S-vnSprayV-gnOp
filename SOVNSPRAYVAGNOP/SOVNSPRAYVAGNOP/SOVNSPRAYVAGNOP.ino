@@ -21,7 +21,7 @@ int distanceMultiplier=50;
 unsigned long maxDistance=300;
 int secondsNoPress = 0;
 int lightState = 0; 
-int alarmTime = 5;
+int alarmTime = 3;
 
 void setup() {
     delay(500); // Short delay for stability

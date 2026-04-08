@@ -1,7 +1,7 @@
 import keyboard
 import serial
 import time
-# --- Configuration ---
+
 SERIAL_PORT = 'COM6'  
 BAUD_RATE = 115200
 

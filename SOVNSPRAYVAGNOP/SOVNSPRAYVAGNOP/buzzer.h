@@ -21,7 +21,7 @@ class Buzzer {
       digitalWrite(_pin, LOW);
     }
 
-    // Beep for a specific duration 
+    // Beep for a set time 
     void beep(int duration = 100) {
       digitalWrite(_pin, HIGH);
       _stopTime = millis() + duration;

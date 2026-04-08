@@ -18,7 +18,7 @@ class Ultrasonic {
       pinMode(_echoPin, INPUT);
     }
 
-    // The GetDistance function
+    // gets the distance in centimeters
     float GetDistance() {
       digitalWrite(_trigPin, LOW);
       delayMicroseconds(2);
@@ -29,7 +29,7 @@ class Ultrasonic {
 
       long duration = pulseIn(_echoPin, HIGH,25000);
       
-      // distance in centimeters
+      // convert distance to centimeters
       float distance = (duration * 0.0343) / 2;
       if (distance > 0){
         lastDistance=distance;

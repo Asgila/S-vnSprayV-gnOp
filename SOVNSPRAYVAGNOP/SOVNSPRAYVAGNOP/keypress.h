@@ -9,7 +9,7 @@ class keyTracker {
 
   public:
     void update() {
-        // Read everything available in the buffer so we don't get backlogged
+        // Read buffer 
         while (Serial.available() > 0) {
             String input = Serial.readStringUntil('\n');
             input.trim(); 
@@ -24,14 +24,14 @@ class keyTracker {
     }
 
     bool wasKeyPressed() {
-        // 1. Save the current state
+        // Save current state
         bool currentState = _hasActivity;
         
-        // 2. Clear the state immediately after reading it!
-        // This prevents the system from getting stuck if the PC misses a message.
+        // Clear state after reading it!
+        
         _hasActivity = false; 
         
-        // 3. Return the saved state
+        // Return the saved state
         return currentState;
     }
 };

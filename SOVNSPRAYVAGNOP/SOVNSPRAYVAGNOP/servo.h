@@ -6,7 +6,6 @@
 const int SERVO_PIN = 15;
 Servo myServo;
 
-// Variables to track state
 unsigned long servoMoveStartTime = 0;
 bool servoIsMoving = false;
 int servoStep = 0; // 0: Idle, 1: Moving to 180, 2: Moving to 0
