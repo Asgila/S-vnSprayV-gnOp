@@ -57,7 +57,7 @@ void loop() {
 
         float threshold = (float)dashboardSliderValue * (float)distanceMultiplier;
         float currentDist = distSensor.GetDistance();
-
+        Serial.printf("the distance now is %f\n");
 
         if (threshold>currentDist){//If it is inside distance
             if (!keyPressed && (currentTime-lastTime)>1010){//If no key was pressed and a second has passed
@@ -77,7 +77,7 @@ void loop() {
             if (secondsNoPress>alarmTime){//If alarm and spray should be on
                 RedOn();
                 DisplayText("GET BACK TO WORK");
-                if (currentTime-lastAlarmTime>1000){
+                if (currentTime-lastAlarmTime>2200){
                     lastAlarmTime = currentTime;
                     startServoCycle();
                     myBuzzer.beep(400);

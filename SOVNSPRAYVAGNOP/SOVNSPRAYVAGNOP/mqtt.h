@@ -5,8 +5,8 @@ bool dashboardSwitchState = false;
 int dashboardSliderValue = 1;
 
 // --- WiFi Credentials ---
-const char* ssid = "OnePlus 8 Pro";
-const char* password = "123456789";
+const char* ssid = "Helens iPhone";
+const char* password = "ABCD2310";
 
 // --- Maqiatto Broker Settings ---
 const char* mqtt_server = "maqiatto.com";
